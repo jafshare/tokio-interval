@@ -102,7 +102,6 @@ mod tests {
     use super::*;
     use std::sync::atomic::{AtomicU64, Ordering};
     use std::sync::Arc;
-    #[tokio::test]
     async fn test_set_interval() {
         let times = 3;
         let counter = Arc::new(AtomicU64::new(0));
@@ -127,8 +126,8 @@ mod tests {
         assert_eq!(TIMERS.lock().unwrap().len(), 2);
         tokio::time::sleep(Duration::from_millis(times * 1100)).await;
         assert_eq!(counter.load(Ordering::SeqCst), times * 2);
+        counter.store(0, Ordering::SeqCst);
     }
-    #[tokio::test]
     async fn test_set_interval_async() {
         let times = 3;
         let counter = Arc::new(AtomicU64::new(0));
@@ -155,8 +154,8 @@ mod tests {
         assert_eq!(TIMERS.lock().unwrap().len(), 2);
         tokio::time::sleep(Duration::from_millis(times * 1100)).await;
         assert_eq!(counter.load(Ordering::SeqCst), times * 2);
+        counter.store(0, Ordering::SeqCst);
     }
-    #[tokio::test]
     async fn test_set_timeout() {
         let counter = Arc::new(AtomicU64::new(0));
         {
@@ -181,8 +180,8 @@ mod tests {
         tokio::time::sleep(Duration::from_millis(1100)).await;
         assert_eq!(TIMERS.lock().unwrap().len(), 0);
         assert_eq!(counter.load(Ordering::SeqCst), 2);
+        counter.store(0, Ordering::SeqCst);
     }
-    #[tokio::test]
     async fn test_set_timeout_async() {
         let counter = Arc::new(AtomicU64::new(0));
         {
@@ -209,8 +208,8 @@ mod tests {
         tokio::time::sleep(Duration::from_millis(1100)).await;
         assert_eq!(TIMERS.lock().unwrap().len(), 0);
         assert_eq!(counter.load(Ordering::SeqCst), 2);
+        counter.store(0, Ordering::SeqCst);
     }
-    #[tokio::test]
     async fn test_clear_timer() {
         let times = 3;
         let counter = Arc::new(AtomicU64::new(0));
@@ -258,5 +257,15 @@ mod tests {
         tokio::time::sleep(Duration::from_millis(times * 1100)).await;
         assert_eq!(TIMERS.lock().unwrap().len(), 1);
         assert_eq!(counter.load(Ordering::SeqCst), times * 1 + 1);
+        counter.store(0, Ordering::SeqCst);
+    }
+    // 统一在这里测试，避免同时进行，导致counter数值无法确定
+    #[tokio::test]
+    async fn test_timer() {
+        test_set_interval().await;
+        test_set_interval_async().await;
+        test_set_timeout().await;
+        test_set_timeout_async().await;
+        test_clear_timer().await;
     }
 }

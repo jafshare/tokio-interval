@@ -2,6 +2,7 @@
 name = "tokio_interval"
 version = "0.1.0"
 edition = "2021"
+authors = ["Hunter Jiang"]
 keywords = ["tokio", "set-interval", "interval", "set-timeout", "timeout", "timer", "async"]
 categories = ["asynchronous"]
 readme = "README.md"
