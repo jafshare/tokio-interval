@@ -1,10 +1,17 @@
 [package]
-name = "tokio-timer"
+name = "tokio_interval"
 version = "0.1.0"
 edition = "2021"
-
+keywords = ["tokio", "set-interval", "interval", "set-timeout", "timeout", "timer", "async"]
+categories = ["asynchronous"]
+readme = "README.md"
+homepage = "https://github.com/jafshare/tokio-interval"
+repository = "https://github.com/jafshare/tokio-interval"
+documentation = "https://docs.rs/tokio_interval"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio = { version = "1.25", features = ["time","sync","rt-multi-thread","macros"] }
+tokio = { version = "1.25", features = ["time","rt-multi-thread"] }
 once_cell = "1.17"
+[dev-dependencies]
+tokio = { version = "1.25", features = ["macros"] }

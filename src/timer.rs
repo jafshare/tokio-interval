@@ -5,10 +5,12 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Mutex;
 use tokio::task::JoinHandle;
 use tokio::time::{interval_at, sleep, Duration, Instant};
+#[allow(dead_code)]
 static TIMER_ID: Lazy<AtomicU64> = Lazy::new(|| AtomicU64::new(0));
+#[allow(dead_code)]
 static TIMERS: Lazy<Mutex<HashMap<u64, JoinHandle<()>>>> = Lazy::new(|| Mutex::new(HashMap::new()));
 /// 清除指定的定时器
-pub fn clear_timer(id: u64) {
+pub(crate) fn _clear_timer(id: u64) {
     let mut timer_map = TIMERS.lock().unwrap();
     // 如果定时器不存在，则提前释放锁
     if !timer_map.contains_key(&id) {
@@ -23,7 +25,7 @@ pub fn clear_timer(id: u64) {
     timer_map.remove(&id);
 }
 /// 开启定时器，指定ms后,执行传入的回调函数
-pub fn set_interval<F: Fn() + Send + 'static>(f: F, ms: u64) -> u64 {
+pub(crate) fn _set_interval<F: Fn() + Send + 'static>(f: F, ms: u64) -> u64 {
     let start = Instant::now() + Duration::from_millis(ms);
     let period = Duration::from_millis(ms);
     let handler: JoinHandle<()> = tokio::spawn(async move {
@@ -39,7 +41,7 @@ pub fn set_interval<F: Fn() + Send + 'static>(f: F, ms: u64) -> u64 {
     id
 }
 /// 定时器的异步版本,指定ms后，执行传入的Future
-pub fn set_interval_async<
+pub(crate) fn _set_interval_async<
     F: (Fn() -> Fut) + Sync + Send + 'static,
     Fut: Future + Sync + Send + 'static,
 >(
@@ -61,21 +63,21 @@ pub fn set_interval_async<
     id
 }
 /// 延时器
-pub fn set_timeout<F: Fn() + Send + 'static>(f: F, ms: u64) -> u64 {
+pub(crate) fn _set_timeout<F: Fn() + Send + 'static>(f: F, ms: u64) -> u64 {
     let delay = Duration::from_millis(ms);
     let id = TIMER_ID.fetch_add(1, Ordering::SeqCst);
     let handler = tokio::spawn(async move {
         sleep(delay).await;
         f();
         // 执行完毕后自动清除定时器
-        clear_timer(id);
+        _clear_timer(id);
     });
     // 保存timer数据
     TIMERS.lock().unwrap().insert(id, handler);
     id
 }
 /// 延时器的异步版本
-pub fn set_timeout_sync<
+pub(crate) fn _set_timeout_async<
     F: (Fn() -> Fut) + Send + Sync + 'static,
     Fut: Future + Send + Sync + 'static,
 >(
@@ -88,7 +90,7 @@ pub fn set_timeout_sync<
         sleep(delay).await;
         f().await;
         // 执行完毕后，自动清除定时器
-        clear_timer(id);
+        _clear_timer(id);
     });
     // 保存timer数据
     TIMERS.lock().unwrap().insert(id, handler);
@@ -106,7 +108,7 @@ mod tests {
         let counter = Arc::new(AtomicU64::new(0));
         {
             let counter = counter.clone();
-            set_interval(
+            _set_interval(
                 move || {
                     counter.clone().fetch_add(1, Ordering::SeqCst);
                 },
@@ -115,7 +117,7 @@ mod tests {
         }
         {
             let counter = counter.clone();
-            set_interval(
+            _set_interval(
                 move || {
                     counter.clone().fetch_add(1, Ordering::SeqCst);
                 },
@@ -138,7 +140,7 @@ mod tests {
                     counter_inner.fetch_add(1, Ordering::SeqCst);
                 }
             };
-            set_interval_async(closure_async, 1 * 1000);
+            _set_interval_async(closure_async, 1 * 1000);
         }
         {
             let counter = counter.clone();
@@ -148,7 +150,7 @@ mod tests {
                     counter_inner.fetch_add(1, Ordering::SeqCst);
                 }
             };
-            set_interval_async(closure_async, 1 * 1000);
+            _set_interval_async(closure_async, 1 * 1000);
         }
         assert_eq!(TIMERS.lock().unwrap().len(), 2);
         tokio::time::sleep(Duration::from_millis(times * 1100)).await;
@@ -159,7 +161,7 @@ mod tests {
         let counter = Arc::new(AtomicU64::new(0));
         {
             let counter = counter.clone();
-            set_timeout(
+            _set_timeout(
                 move || {
                     counter.fetch_add(1, Ordering::SeqCst);
                 },
@@ -168,7 +170,7 @@ mod tests {
         }
         {
             let counter = counter.clone();
-            set_timeout(
+            _set_timeout(
                 move || {
                     counter.fetch_add(1, Ordering::SeqCst);
                 },
@@ -191,7 +193,7 @@ mod tests {
                     counter_inner.fetch_add(1, Ordering::SeqCst);
                 }
             };
-            set_timeout_sync(closure_async, 1000);
+            _set_timeout_async(closure_async, 1000);
         }
         {
             let counter = counter.clone();
@@ -201,7 +203,7 @@ mod tests {
                     counter_inner.fetch_add(1, Ordering::SeqCst);
                 }
             };
-            set_timeout_sync(closure_async, 1000);
+            _set_timeout_async(closure_async, 1000);
         }
         assert_eq!(TIMERS.lock().unwrap().len(), 2);
         tokio::time::sleep(Duration::from_millis(1100)).await;
@@ -214,7 +216,7 @@ mod tests {
         let counter = Arc::new(AtomicU64::new(0));
         {
             let counter = counter.clone();
-            set_interval(
+            _set_interval(
                 move || {
                     counter.clone().fetch_add(1, Ordering::SeqCst);
                 },
@@ -229,18 +231,18 @@ mod tests {
                     counter_inner.fetch_add(1, Ordering::SeqCst);
                 }
             };
-            let id = set_interval_async(closure_async, 1 * 1000);
-            clear_timer(id);
+            let id = _set_interval_async(closure_async, 1 * 1000);
+            _clear_timer(id);
         }
         {
             let counter = counter.clone();
-            let id = set_timeout(
+            let id = _set_timeout(
                 move || {
                     counter.fetch_add(1, Ordering::SeqCst);
                 },
                 1000,
             );
-            clear_timer(id);
+            _clear_timer(id);
         }
         {
             let counter = counter.clone();
@@ -250,7 +252,7 @@ mod tests {
                     counter_inner.fetch_add(1, Ordering::SeqCst);
                 }
             };
-            set_timeout_sync(closure_async, 1000);
+            _set_timeout_async(closure_async, 1000);
         }
         assert_eq!(TIMERS.lock().unwrap().len(), 2);
         tokio::time::sleep(Duration::from_millis(times * 1100)).await;
