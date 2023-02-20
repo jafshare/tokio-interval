@@ -1,4 +1,4 @@
-# Tokio-Timer
+# Tokio-Interval
 
 基于 `tokio` 实现了类似于 `js` 的 `setInterval`、`setTimeout` 的功能
 
@@ -13,7 +13,7 @@
 注意: 
 - 由于实现的逻辑，`set_interval` 受传入的 `fn` 运行时耗的影响，`ms` 不是一个固定的间隔
 
-使用方法:
+## 使用方法
 
 **Cargo.toml**
 
