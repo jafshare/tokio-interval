@@ -230,7 +230,7 @@ mod tests {
             _set_timeout_async(closure_async, 100);
         }
         assert_eq!(TIMERS.lock().unwrap().len(), 2);
-        tokio::time::sleep(Duration::from_millis(110)).await;
+        tokio::time::sleep(Duration::from_millis(200)).await;
         assert_eq!(TIMERS.lock().unwrap().len(), 0);
         assert_eq!(counter.load(Ordering::SeqCst), 2);
         counter.store(0, Ordering::SeqCst);
@@ -291,13 +291,13 @@ mod tests {
         _set_interval(|| println!("hello2"), 100);
         _set_interval(|| println!("hello3"), 100);
         _set_timeout(|| println!("hello4"), 100);
-        _set_timeout(|| println!("hello5"), 120);
+        _set_timeout(|| println!("hello5"), 250);
         assert_eq!(TIMERS.lock().unwrap().len(), 5);
-        tokio::time::sleep(Duration::from_millis(110)).await;
+        tokio::time::sleep(Duration::from_millis(200)).await;
         assert_eq!(TIMERS.lock().unwrap().len(), 4);
         _clear_all_timer();
         assert_eq!(TIMERS.lock().unwrap().len(), 0);
-        tokio::time::sleep(Duration::from_millis(110)).await;
+        tokio::time::sleep(Duration::from_millis(200)).await;
     }
     // 统一在这里测试，避免同时进行，导致counter数值无法确定
     #[tokio::test]

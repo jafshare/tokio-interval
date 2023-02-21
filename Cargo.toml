@@ -3,7 +3,7 @@ name = "tokio_interval"
 description = """
 基于Tokio实现了 setInterval(callback, ms) 和 setTimeout(callback, ms) 类似于Javascript的API.
 """
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 authors = ["Hunter Jiang"]
 keywords = ["tokio", "set-interval", "interval", "set-timeout", "timeout"]
@@ -16,7 +16,7 @@ documentation = "https://docs.rs/tokio_interval"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio = { version = "1.25", features = ["time","rt-multi-thread"] }
+tokio = { version = "1", features = ["time","rt-multi-thread"] }
 once_cell = "1.17"
 [dev-dependencies]
-tokio = { version = "1.25", features = ["macros"] }
+tokio = { version = "1", features = ["macros"] }
