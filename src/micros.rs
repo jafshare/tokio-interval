@@ -127,7 +127,7 @@ macro_rules! set_timeout_async {
 /// # Example
 /// ```rust
 /// use tokio::time::{sleep, Duration};
-/// use tokio_interval::set_interval;
+/// use tokio_interval::{set_interval,clear_timer};
 ///
 /// #[tokio::main]
 /// async fn main(){
@@ -144,6 +144,29 @@ macro_rules! clear_timer {
         $crate::timer::_clear_timer($id)
     };
 }
+
+/// 清除由 tokio_interval 创建的定时器，包含 set_interval!、set_timeout!、set_interval_async!、set_timeout_async!
+/// # Example
+/// ```rust
+/// use tokio::time::{sleep, Duration};
+/// use tokio_interval::{set_interval,clear_all_timer};
+///
+/// #[tokio::main]
+/// async fn main(){
+///     set_interval!(|| { println!("clear_timer") }, 500);
+///     set_interval!(|| { println!("clear_timer1") }, 500);
+///     sleep(Duration::from_millis(1300)).await;
+///     clear_all_timer!();
+///     sleep(Duration::from_millis(1300)).await;
+/// }
+/// ```
+#[macro_export]
+macro_rules! clear_all_timer {
+    () => {
+        $crate::timer::_clear_all_timer()
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use tokio::time::{sleep, Duration};
@@ -222,6 +245,14 @@ mod tests {
         sleep(Duration::from_millis(1300)).await;
         clear_timer!(id);
         clear_timer!(id1);
+        sleep(Duration::from_millis(1300)).await;
+    }
+    #[tokio::test]
+    async fn test_clear_all_timer_micro() {
+        set_interval!(|| { println!("clear_timer") }, 500);
+        set_interval!(|| { println!("clear_timer1") }, 500);
+        sleep(Duration::from_millis(1300)).await;
+        clear_all_timer!();
         sleep(Duration::from_millis(1300)).await;
     }
 }

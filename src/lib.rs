@@ -7,11 +7,12 @@
 //! - `set_timeout!(cb, ms)` 创建一个延时器，支持传入一个闭包
 //! - `set_timeout_async!(future, ms)` 创建一个延时器，支持传入一个future
 //! - `clear_timer!(timer_id)` 清除定时器
+//! - `clear_all_timer!()` 清除由 tokio_interval 创建的所有定时器，包含 set_interval!、set_timeout!、set_interval_async!、set_timeout_async!
 //!
 //! 注意:
 //! - 由于实现的逻辑，`set_interval` 、`set_interval_async` 受传入的 `fn` 运行时耗的影响，`ms` 不是一个固定的间隔
 //!
-mod micros;
-mod timer;
+pub mod micros;
+pub mod timer;
 
 pub use micros::*;

@@ -1,10 +1,9 @@
 [package]
 name = "tokio_interval"
 description = """
-基于Tokio实现了 `setInterval(callback, ms)` 和
-`setTimeout(callback, ms)` 类似于Javascript的API.
+基于Tokio实现了 setInterval(callback, ms) 和 setTimeout(callback, ms) 类似于Javascript的API.
 """
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 authors = ["Hunter Jiang"]
 keywords = ["tokio", "set-interval", "interval", "set-timeout", "timeout"]
